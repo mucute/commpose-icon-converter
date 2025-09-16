@@ -1,133 +1,112 @@
 package com.github.mucute.commposeiconconverter.utils
 
 /**
- * SVG变换解析器
+ * SVG transform parser
  */
-class TransformParser {
+object TransformParser {
     
     /**
-     * 变换矩阵数据类
+     * Transform matrix data class
      */
     data class Transform(
-        val scaleX: Float = 1f,
-        val scaleY: Float = 1f,
         val translateX: Float = 0f,
         val translateY: Float = 0f,
+        val scaleX: Float = 1f,
+        val scaleY: Float = 1f,
         val rotation: Float = 0f,
         val skewX: Float = 0f,
         val skewY: Float = 0f
     )
     
     /**
-     * 解析SVG变换字符串
+     * Parse SVG transform string
      */
-    fun parseTransform(transformStr: String?): Transform? {
-        if (transformStr.isNullOrBlank()) return null
+    fun parseTransform(transformString: String?): Transform {
+        if (transformString.isNullOrBlank()) {
+            return Transform()
+        }
         
-        var result = Transform()
+        var translateX = 0f
+        var translateY = 0f
+        var scaleX = 1f
+        var scaleY = 1f
+        var rotation = 0f
         
-        // 匹配各种变换函数
-        val transformRegex = Regex("(\\w+)\\s*\\(([^)]+)\\)")
-        val matches = transformRegex.findAll(transformStr)
+        // Match various transform functions
+        val translateRegex = Regex("""translate\s*\(\s*([^,\s]+)(?:\s*,\s*([^)]+))?\s*\)""")
+        val scaleRegex = Regex("""scale\s*\(\s*([^,\s]+)(?:\s*,\s*([^)]+))?\s*\)""")
+        val rotateRegex = Regex("""rotate\s*\(\s*([^,\s]+)(?:\s*,\s*([^,\s]+)\s*,\s*([^)]+))?\s*\)""")
+        val matrixRegex = Regex("""matrix\s*\(\s*([^,\s]+)\s*,\s*([^,\s]+)\s*,\s*([^,\s]+)\s*,\s*([^,\s]+)\s*,\s*([^,\s]+)\s*,\s*([^)]+)\s*\)""")
         
-        for (match in matches) {
-            val function = match.groupValues[1]
-            val params = parseParameters(match.groupValues[2])
+        // Parse translate
+        translateRegex.findAll(transformString).forEach { match ->
+            translateX += match.groupValues[1].toFloatOrNull() ?: 0f
+            translateY += match.groupValues[2].takeIf { it.isNotBlank() }?.toFloatOrNull() ?: 0f
+        }
+        
+        // Parse scale
+        scaleRegex.findAll(transformString).forEach { match ->
+            val sx = match.groupValues[1].toFloatOrNull() ?: 1f
+            val sy = match.groupValues[2].takeIf { it.isNotBlank() }?.toFloatOrNull() ?: sx
+            scaleX *= sx
+            scaleY *= sy
+        }
+        
+        // Parse rotate
+        rotateRegex.findAll(transformString).forEach { match ->
+            val angle = match.groupValues[1].toFloatOrNull() ?: 0f
+            rotation += angle
             
-            result = when (function.lowercase()) {
-                "translate" -> applyTranslate(result, params)
-                "scale" -> applyScale(result, params)
-                "rotate" -> applyRotate(result, params)
-                "skewx" -> applySkewX(result, params)
-                "skewy" -> applySkewY(result, params)
-                "matrix" -> applyMatrix(result, params)
-                else -> result
+            // If rotation center is specified
+            if (match.groupValues[2].isNotBlank() && match.groupValues[3].isNotBlank()) {
+                val cx = match.groupValues[2].toFloatOrNull() ?: 0f
+                val cy = match.groupValues[3].toFloatOrNull() ?: 0f
+                
+                // rotate(angle, cx, cy) - rotate around specified point
+                // Simplified handling here, only record angle
+                // In actual implementation, need to consider rotation center
             }
         }
         
-        return result
-    }
-    
-    private fun parseParameters(paramStr: String): List<Float> {
-        return paramStr.split(Regex("[,\\s]+"))
-            .filter { it.isNotBlank() }
-            .mapNotNull { it.toFloatOrNull() }
-    }
-    
-    private fun applyTranslate(transform: Transform, params: List<Float>): Transform {
-        return when (params.size) {
-            1 -> transform.copy(
-                translateX = transform.translateX + params[0],
-                translateY = transform.translateY
-            )
-            2 -> transform.copy(
-                translateX = transform.translateX + params[0],
-                translateY = transform.translateY + params[1]
-            )
-            else -> transform
+        // Parse matrix
+        matrixRegex.findAll(transformString).forEach { match ->
+            val a = match.groupValues[1].toFloatOrNull() ?: 1f
+            val b = match.groupValues[2].toFloatOrNull() ?: 0f
+            val c = match.groupValues[3].toFloatOrNull() ?: 0f
+            val d = match.groupValues[4].toFloatOrNull() ?: 1f
+            val e = match.groupValues[5].toFloatOrNull() ?: 0f
+            val f = match.groupValues[6].toFloatOrNull() ?: 0f
+            
+            // matrix(a, b, c, d, e, f) represents:
+            // [a c e]
+            // [b d f]
+            // [0 0 1]
+            
+            // Simplified handling here, extract translation and scale information
+            translateX += e
+            translateY += f
+            scaleX *= a
+            scaleY *= d
         }
-    }
-    
-    private fun applyScale(transform: Transform, params: List<Float>): Transform {
-        return when (params.size) {
-            1 -> transform.copy(
-                scaleX = transform.scaleX * params[0],
-                scaleY = transform.scaleY * params[0]
-            )
-            2 -> transform.copy(
-                scaleX = transform.scaleX * params[0],
-                scaleY = transform.scaleY * params[1]
-            )
-            else -> transform
-        }
-    }
-    
-    private fun applyRotate(transform: Transform, params: List<Float>): Transform {
-        return when (params.size) {
-            1 -> transform.copy(rotation = transform.rotation + params[0])
-            3 -> {
-                // rotate(angle, cx, cy) - 围绕指定点旋转
-                // 这里简化处理，只记录角度
-                transform.copy(rotation = transform.rotation + params[0])
-            }
-            else -> transform
-        }
-    }
-    
-    private fun applySkewX(transform: Transform, params: List<Float>): Transform {
-        return if (params.isNotEmpty()) {
-            transform.copy(skewX = transform.skewX + params[0])
-        } else transform
-    }
-    
-    private fun applySkewY(transform: Transform, params: List<Float>): Transform {
-        return if (params.isNotEmpty()) {
-            transform.copy(skewY = transform.skewY + params[0])
-        } else transform
-    }
-    
-    private fun applyMatrix(transform: Transform, params: List<Float>): Transform {
-        // matrix(a, b, c, d, e, f)
-        // 这里简化处理，提取平移和缩放信息
-        return if (params.size == 6) {
-            transform.copy(
-                scaleX = transform.scaleX * params[0],
-                scaleY = transform.scaleY * params[3],
-                translateX = transform.translateX + params[4],
-                translateY = transform.translateY + params[5]
-            )
-        } else transform
+        
+        return Transform(
+            translateX = translateX,
+            translateY = translateY,
+            scaleX = scaleX,
+            scaleY = scaleY,
+            rotation = rotation
+        )
     }
     
     /**
-     * 将角度转换为弧度
+     * Convert degrees to radians
      */
     fun degreesToRadians(degrees: Float): Float {
         return degrees * Math.PI.toFloat() / 180f
     }
     
     /**
-     * 将弧度转换为角度
+     * Convert radians to degrees
      */
     fun radiansToDegrees(radians: Float): Float {
         return radians * 180f / Math.PI.toFloat()

@@ -20,7 +20,7 @@ class SvgToImageVectorConverter {
     fun generateKotlinFileFromSvg(
         svgFile: File,
         outputFile: File,
-        iconName: String ,
+        iconName: String = outputFile.nameWithoutExtension,
         packageName: String = "com.example.icons",
         iconParentClass: String? = null,
         iconStyle: String? = null

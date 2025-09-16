@@ -32,15 +32,15 @@ class ConvertToComposeIconDialog(
     private val packageNameField = JBTextField()
     private val svgFilePathField = JBTextField()
     
-    // 图标父类输入框
+    // Icon parent class input field
     private val iconParentClassField = JBTextField()
     
-    // 图标样式选择框
+    // Icon style selection box
     private val iconStyleComboBox = JComboBox(arrayOf("None", "Default", "Outline", "Bold", "Twotone", "Bulk", "Broken", "Linear"))
     
-    // 文件名处理选项
-    private val removeSpecialCharsCheckBox = JCheckBox("去除特殊符号", true)
-    private val camelCaseCheckBox = JCheckBox("驼峰命名", true)
+    // File name processing options
+    private val removeSpecialCharsCheckBox = JCheckBox("Remove Special Characters", true)
+    private val camelCaseCheckBox = JCheckBox("Camel Case", true)
     
     // 存储原始文件名
     private var originalFileName: String = ""
@@ -77,9 +77,9 @@ class ConvertToComposeIconDialog(
             .addLabeledComponent(JBLabel("SVG File:"), createSvgFilePanel(), 1, false)
             .addLabeledComponent(JBLabel("Icon Name:"), iconNameField, 1, false)
             .addLabeledComponent(JBLabel("Package Name:"), packageNameField, 1, false)
-            .addLabeledComponent(JBLabel("图标父类:"), createIconParentClassPanel(), 1, false)
-            .addLabeledComponent(JBLabel("图标样式:"), iconStyleComboBox, 1, false)
-            .addLabeledComponent(JBLabel("文件名处理:"), createFileNameOptionsPanel(), 1, false)
+            .addLabeledComponent(JBLabel("Icon Parent Class:"), createIconParentClassPanel(), 1, false)
+            .addLabeledComponent(JBLabel("Icon Style:"), iconStyleComboBox, 1, false)
+            .addLabeledComponent(JBLabel("File Name Processing:"), createFileNameOptionsPanel(), 1, false)
             .addComponentFillVertically(JPanel(), 0)
             .panel
             
@@ -97,8 +97,8 @@ class ConvertToComposeIconDialog(
         browseButton.addActionListener {
             // 使用IntelliJ IDEA的文件选择器
             val descriptor = FileChooserDescriptor(true, false, false, false, false, false)
-            descriptor.title = "选择SVG文件"
-            descriptor.description = "选择要转换的SVG文件"
+            descriptor.title = "Select SVG File"
+            descriptor.description = "Select SVG file to convert"
             descriptor.withFileFilter { file -> file.extension?.lowercase() == "svg" }
             
             val selectedFiles = FileChooser.chooseFiles(descriptor, project, null)
@@ -149,18 +149,18 @@ class ConvertToComposeIconDialog(
         val panel = JPanel(BorderLayout())
         panel.add(iconParentClassField, BorderLayout.CENTER)
         
-        val browseButton = JButton("选择类")
+        val browseButton = JButton("Select Class")
         browseButton.addActionListener {
             try {
                 val chooser = TreeClassChooserFactory.getInstance(project)
-                    .createAllProjectScopeChooser("选择图标父类")
+                    .createAllProjectScopeChooser("Select Icon Parent Class")
                 chooser.showDialog()
                 val selectedClass = chooser.selected
                 if (selectedClass != null) {
                     iconParentClassField.text = selectedClass.qualifiedName ?: selectedClass.name
                 }
             } catch (e: Exception) {
-                Messages.showErrorDialog(project, "无法打开类选择器: ${e.message}", "错误")
+                Messages.showErrorDialog(project, "Cannot open class chooser: ${e.message}", "Error")
             }
         }
         panel.add(browseButton, BorderLayout.EAST)
@@ -187,18 +187,18 @@ class ConvertToComposeIconDialog(
         val iconStyle = iconStyleComboBox.selectedItem as String
         
         if (svgFilePath.isEmpty()) {
-            Messages.showErrorDialog(project, "请选择SVG文件", "错误")
+            Messages.showErrorDialog(project, "Please select SVG file", "Error")
             return
         }
         
         if (iconName.isEmpty()) {
-            Messages.showErrorDialog(project, "请输入图标名称", "错误")
+            Messages.showErrorDialog(project, "Please enter icon name", "Error")
             return
         }
         
         val inputFile = File(svgFilePath)
         if (!inputFile.exists() || !inputFile.extension.equals("svg", ignoreCase = true)) {
-            Messages.showErrorDialog(project, "请选择有效的SVG文件", "错误")
+            Messages.showErrorDialog(project, "Please select valid SVG file", "Error")
             return
         }
         
@@ -229,8 +229,8 @@ class ConvertToComposeIconDialog(
             
             Messages.showInfoMessage(
                 project,
-                "转换完成！个文件",
-                "成功"
+                "Conversion completed! files",
+                "Success"
             )
             
             super.doOKAction()
@@ -238,8 +238,8 @@ class ConvertToComposeIconDialog(
         } catch (e: Exception) {
             Messages.showErrorDialog(
                 project,
-                "转换失败: ${e.message}",
-                "错误"
+                "Conversion failed: ${e.message}",
+                "Error"
             )
         }
     }
@@ -247,17 +247,17 @@ class ConvertToComposeIconDialog(
     private fun processFileName(fileName: String): String {
         var processed = fileName
         
-        // 如果两个复选框都没勾选，直接返回原始文件名
+        // If both checkboxes are unchecked, return original filename
         if (!removeSpecialCharsCheckBox.isSelected && !camelCaseCheckBox.isSelected) {
             return processed
         }
         
-        // 先进行驼峰命名转换（在去除特殊符号之前）
+        // First perform camel case conversion (before removing special characters)
         if (camelCaseCheckBox.isSelected) {
             processed = processed.toCamelCase()
         }
         
-        // 然后去除特殊符号
+        // Then remove special characters
         if (removeSpecialCharsCheckBox.isSelected) {
             processed = processed.replace(Regex("[^a-zA-Z0-9]"), "")
         }
@@ -279,7 +279,7 @@ class ConvertToComposeIconDialog(
     }
     
     /**
-     * 根据目录获取包名
+     * Get package name from directory
      */
     private fun getPackageNameFromDirectory(directory: VirtualFile?): String? {
         if (directory == null) return null
@@ -296,7 +296,7 @@ class ConvertToComposeIconDialog(
                 null
             }
         } catch (e: Exception) {
-            // 如果获取包名失败，返回null使用默认值
+            // If getting package name fails, return null to use default value
             null
         }
     }

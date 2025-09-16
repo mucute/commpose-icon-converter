@@ -7,7 +7,7 @@ object PathDataParser {
         val tokens = tokenize(cleanedData)
         val commands = mutableListOf<String>()
         
-        // 当前位置跟踪（用于相对命令）
+        // Current position tracking (for relative commands)
         var currentX = 0.0
         var currentY = 0.0
         var lastMoveX = 0.0
@@ -168,7 +168,7 @@ object PathDataParser {
                 }
                 
                 "A" -> {
-                    // Arc命令比较复杂，简化为lineTo
+                    // Arc command is complex, simplified to lineTo
                     val isRelative = token == "a"
                     val x = tokens.getOrNull(i + 6)?.toDoubleOrNull() ?: 0.0
                     val y = tokens.getOrNull(i + 7)?.toDoubleOrNull() ?: 0.0
@@ -194,7 +194,7 @@ object PathDataParser {
                 }
                 
                 else -> {
-                    // 跳过无法识别的token
+                    // Skip unrecognized tokens
                     i += 1
                 }
             }
