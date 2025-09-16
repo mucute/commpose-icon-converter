@@ -6,10 +6,23 @@
 
     <depends>com.intellij.modules.platform</depends>
 
+    <depends>com.intellij.modules.lang</depends>
+    <depends>com.intellij.modules.java</depends>
+
     <resource-bundle>messages.MyBundle</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow factoryClass="com.github.mucute.commposeiconconverter.toolWindow.MyToolWindowFactory" id="MyToolWindow"/>
-        <postStartupActivity implementation="com.github.mucute.commposeiconconverter.startup.MyProjectActivity" />
+
     </extensions>
+
+    <actions>
+        <action id="ConvertToComposeIcon" 
+                class="com.github.mucute.commposeiconconverter.actions.ConvertToComposeIconAction"
+                text="Convert to Compose Icon"
+                description="Convert SVG file to Jetpack Compose ImageVector">
+            <add-to-group group-id="ProjectViewPopupMenu" anchor="after" relative-to-action="CutCopyPasteGroup"/>
+            <add-to-group group-id="EditorPopupMenu" anchor="after" relative-to-action="CutCopyPasteGroup"/>
+            <add-to-group group-id="NewGroup" anchor="last"/>
+        </action>
+    </actions>
 </idea-plugin>
