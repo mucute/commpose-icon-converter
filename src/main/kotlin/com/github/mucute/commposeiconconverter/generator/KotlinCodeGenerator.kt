@@ -47,9 +47,10 @@ class KotlinCodeGenerator {
         iconParentClass: String? = null,
         iconStyle: String? = null
     ): String {
-        val className = iconName.toCamelCase()
+        // 直接使用输入框中的iconName作为类名，不进行转换
+        val className = iconName
         val iconInfo = extractIconInfo(svgDocument, iconName)
-        val propertyName = "_${iconName.toCamelCase(firstLowerCase = true)}"
+        val propertyName = "_${iconName.lowercase()}"
         
         // 构建完整的属性名：图标类名.图标样式.图标名
         val fullPropertyName = buildString {
@@ -81,6 +82,14 @@ class KotlinCodeGenerator {
             appendLine("import androidx.compose.ui.graphics.vector.ImageVector.Builder")
             appendLine("import androidx.compose.ui.graphics.vector.path")
             appendLine("import androidx.compose.ui.unit.dp")
+            
+            // 添加Icon Parent Class的import语句（如果存在）
+            iconParentClass?.let { parentClass ->
+                if (parentClass.isNotEmpty() && parentClass != "None") {
+                    appendLine("import $parentClass")
+                }
+            }
+            
             appendLine()
 
             // 生成ImageVector属性

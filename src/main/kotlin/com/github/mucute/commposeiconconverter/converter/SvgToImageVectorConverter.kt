@@ -78,8 +78,8 @@ class SvgToImageVectorConverter {
         }
 
         inputDir.listFiles { file -> file.extension.lowercase() == "svg" }?.forEach { svgFile ->
-            val iconName = svgFile.nameWithoutExtension.toCamelCase()
-            val outputFile = File(outputDir, "${iconName}Icon.kt")
+            val iconName = svgFile.nameWithoutExtension
+            val outputFile = File(outputDir, "${iconName}.kt")
 
             if (generateKotlinFileFromSvg(svgFile, outputFile, iconName, packageName)) {
                 generatedFiles.add(outputFile)

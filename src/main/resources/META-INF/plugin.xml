@@ -1,11 +1,47 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
     <id>com.github.mucute.commposeiconconverter</id>
-    <name>commpose-icon-converter</name>
-    <vendor>mucute</vendor>
+    <name>Compose Icon Converter</name>
+    <version>1.0.0</version>
+    <vendor email="mucute1215@gmail.com" url="https://github.com/mucute">mucute</vendor>
+    
+    <description><![CDATA[
+        <p>A powerful IntelliJ IDEA plugin that converts SVG files to Jetpack Compose ImageVector format.</p>
+        
+        <h3>Features:</h3>
+        <ul>
+            <li><strong>Easy SVG to ImageVector Conversion</strong>: Right-click on any SVG file and convert it to Compose ImageVector format</li>
+            <li><strong>Automatic File Naming</strong>: Automatically processes file names by removing special characters and converting to PascalCase</li>
+            <li><strong>Customizable Output</strong>: Configure package name, icon parent class, and icon style</li>
+            <li><strong>Multiple Icon Styles</strong>: Support for Default, Outline, Bold, Twotone, Bulk, Broken, and Linear styles</li>
+            <li><strong>Batch Processing</strong>: Convert multiple SVG files at once from directory selection</li>
+            <li><strong>Smart Path Detection</strong>: Automatically detects appropriate output paths and package names</li>
+        </ul>
+        
+        <h3>How to Use:</h3>
+        <ol>
+            <li>Right-click on a directory containing SVG files in the project explorer</li>
+            <li>Select "Convert to Compose Icon" from the context menu</li>
+            <li>Configure the conversion settings in the dialog</li>
+            <li>Click OK to generate Kotlin files with ImageVector definitions for all SVG files in the directory</li>
+        </ol>
+        
+        <p>Perfect for Android developers working with Jetpack Compose who need to convert SVG icons to native ImageVector format.</p>
+    ]]></description>
+
+    <change-notes><![CDATA[
+        <h3>Version 1.0.0</h3>
+        <ul>
+            <li>Initial release</li>
+            <li>SVG to ImageVector conversion</li>
+            <li>Automatic file name processing</li>
+            <li>Customizable output settings</li>
+            <li>Multiple icon style support</li>
+            <li>Batch processing capability</li>
+        </ul>
+    ]]></change-notes>
 
     <depends>com.intellij.modules.platform</depends>
-
     <depends>com.intellij.modules.lang</depends>
     <depends>com.intellij.modules.java</depends>
 
